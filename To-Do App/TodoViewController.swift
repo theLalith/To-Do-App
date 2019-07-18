@@ -11,10 +11,15 @@ import UIKit
 class TodoViewController: UITableViewController{
     
     var needToGrindArray = ["Coding", "Calclus", "Other stuff"]
-    
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let items = defaults.array(forKey: "allItemsArray") as? [String]{
+        needToGrindArray = items
+            
+        }
     }
     
     // This function is to determine how many rows that we need to have in our tableview
@@ -70,6 +75,7 @@ class TodoViewController: UITableViewController{
         let itemAction = UIAlertAction(title: "Add To-Do", style: .default) { (action) in
             // Here is where we put the code of what happens when the add button is pressed
             self.needToGrindArray.append(itemAlertHolder.text!)
+            self.defaults.setValue(self.needToGrindArray, forKey: "allItemsArray")
             self.tableView.reloadData()
         }
         
