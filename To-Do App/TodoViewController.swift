@@ -10,7 +10,8 @@ import UIKit
 
 class TodoViewController: UITableViewController{
     
-    let needToGrindArray = ["Coding", "Calclus", "Other stuff"]
+    var needToGrindArray = ["Coding", "Calclus", "Other stuff"]
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +21,8 @@ class TodoViewController: UITableViewController{
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return needToGrindArray.count
     }
+    
+    // MARK - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
@@ -53,6 +56,32 @@ class TodoViewController: UITableViewController{
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    // MARK - Add New Items
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+    
+        var itemAlertHolder = UITextField()
+        
+        let itemAlert = UIAlertController(title: "Add New Item", message: "", preferredStyle: .alert)
+    
+
+        let itemAction = UIAlertAction(title: "Add To-Do", style: .default) { (action) in
+            // Here is where we put the code of what happens when the add button is pressed
+            self.needToGrindArray.append(itemAlertHolder.text!)
+            self.tableView.reloadData()
+        }
+        
+        itemAlert.addTextField { (itemAlertTextField) in
+            itemAlertTextField.placeholder = "Create a new To-Do"
+            itemAlertHolder = itemAlertTextField
+        }
+        
+        
+       
+        itemAlert.addAction(itemAction)
+        present(itemAlert, animated: true, completion: nil)
     }
     
 

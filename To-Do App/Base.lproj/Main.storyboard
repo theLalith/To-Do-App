@@ -32,7 +32,14 @@
                             <outlet property="delegate" destination="M8e-jx-DnL" id="ivj-65-xLX"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Grind" id="cgE-xb-uYr"/>
+                    <navigationItem key="navigationItem" title="Grind" id="cgE-xb-uYr">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="atM-Zu-JOn">
+                            <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="addButtonPressed:" destination="M8e-jx-DnL" id="hbg-mT-ECL"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="azE-I1-0gM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
