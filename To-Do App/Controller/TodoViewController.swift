@@ -7,19 +7,21 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoViewController: UITableViewController{
     
-    var needToGrindArray = ["Coding", "Calclus", "Other stuff"]
-    let defaults = UserDefaults.standard
+    var needToGrindArray = [Items]()
+    //We are grabbing the persistant container and its context - which is the temporary area where our app can talk to our SQL backend
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let items = defaults.array(forKey: "allItemsArray") as? [String]{
-        needToGrindArray = items
-            
-        }
+       print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        
+        loadData()
     }
     
     // This function is to determine how many rows that we need to have in our tableview
@@ -30,8 +32,16 @@ class TodoViewController: UITableViewController{
     // MARK - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let item = needToGrindArray[indexPath.row]
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = needToGrindArray[indexPath.row]
+        cell.textLabel?.text = item.nameOfItem
+        
+       // the following code is make the checkmark appear or not. We will know if it is done or not based on the didSelectRowAt funcion where we set the completion property
+        
+        cell.accessoryType = item.completion == true ? .checkmark : .none // replaced the if/else statement that we had for all of this. If the cell completion is true, get a checkmark, if not have none
+        
+        
         return cell
         
         // Here is what is going on in the function above:
@@ -48,19 +58,14 @@ class TodoViewController: UITableViewController{
     
     // This function tells the delegate that row is selected
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //let goingToPrint = indexPath.row
-        //print("\(needToGrindArray[goingToPrint])")
-        // instead of that i could also done: print(needToGrindArry[indexPath.row])
+       needToGrindArray[indexPath.row].completion = !needToGrindArray[indexPath.row].completion
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }
+//        context.delete(needToGrindArray[indexPath.row])
+//        needToGrindArray.remove(at: indexPath.row)
         
-        else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
-        
+        saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
+        
     }
     
     // MARK - Add New Items
@@ -74,9 +79,16 @@ class TodoViewController: UITableViewController{
 
         let itemAction = UIAlertAction(title: "Add To-Do", style: .default) { (action) in
             // Here is where we put the code of what happens when the add button is pressed
-            self.needToGrindArray.append(itemAlertHolder.text!)
-            self.defaults.setValue(self.needToGrindArray, forKey: "allItemsArray")
-            self.tableView.reloadData()
+            
+            // we are creating a new ItemsDataModel because the append code itself will not working so we are setting the title into the newItem and then appending it to the thing. Since it is already false, the checkmark will not be toggled.
+            
+            // This newItem that we have created is in the context area, which is a tool that is used to talk to the SQLDatabase
+            let newItem = Items(context: self.context)
+            newItem.nameOfItem = itemAlertHolder.text!
+            newItem.completion = false
+            self.needToGrindArray.append(newItem)
+            self.saveItems()
+            
         }
         
         itemAlert.addTextField { (itemAlertTextField) in
@@ -90,7 +102,26 @@ class TodoViewController: UITableViewController{
         present(itemAlert, animated: true, completion: nil)
     }
     
+    func saveItems () {
+        do{
+           try context.save()
+        }
+        catch{
+            print("We had this error saving the data \(error)")
+        }
+        tableView.reloadData()
+    }
 
+    func loadData () {
+        let request : NSFetchRequest<Items> = Items.fetchRequest()
+        do{
+            needToGrindArray = try context.fetch(request)
+        }
+        catch{
+            print("Had this error fetching the data : \(error)")
+        }
+        
+    }
 
 }
 
